@@ -18,7 +18,7 @@ jobs:
         call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
-    - name: run
+    - name: running test program
       run: python winrunner.py -- testapp.exe -t 5
 
   crash-case:
@@ -37,7 +37,7 @@ jobs:
         call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
-    - name: run
+    - name: running test program
       run: |
         # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
@@ -62,7 +62,7 @@ jobs:
         call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
-    - name: run
+    - name: running test program
       run: |
         # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
