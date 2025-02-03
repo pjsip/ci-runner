@@ -34,7 +34,8 @@ class LinuxRunner(Runner):
         """
         Get file pattern to find dump files
         """
-        return "core.*"
+        #return "core.*"
+        return "*"
 
     @classmethod
     def install(cls):
