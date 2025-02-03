@@ -38,7 +38,13 @@ jobs:
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
     - name: run
-      run: python winrunner.py -t 60 -- testapp.exe -t 5 -c
+      run: |
+        # Runner will return non-zero if the test program fails, but this will fail the job.
+        # So use commands below to save return value to $ret instead.
+        python winrunner.py -t 60 -- testapp.exe -t 5 -c; $ret=$lastexitcode; cmd /C exit 0
+        if ($ret -eq 0) {
+          cmd /C exit 1
+        }
 
   timeout-case:
     runs-on: windows-latest
@@ -57,4 +63,11 @@ jobs:
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
     - name: run
-      run: python winrunner.py -t 5 -- testapp.exe -t 60
+      run: |
+        # Runner will return non-zero if the test program fails, but this will fail the job.
+        # So use commands below to save return value to $ret instead.
+        #python winrunner.py -t 5 -- testapp.exe -t 60; $ret=$lastexitcode; cmd /C exit 0
+        python winrunner.py -- testapp.exe -t 5; $ret=$lastexitcode; cmd /C exit 0
+        if ($ret -eq 0) {
+          cmd /C exit 1
+        }
