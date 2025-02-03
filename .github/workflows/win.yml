@@ -7,6 +7,8 @@ jobs:
     name: Successful case
     steps:
     - uses: actions/checkout@master
+    - name: install crash handler registry
+      run: start-process cmd.exe -Verb runAs -ArgumentList ("/K", "cd", $(Get-Location), "&&", "reg.exe", "IMPORT", "localdumps.reg")
     - name: install ci-runner
       run: |
         pip install -r requirements.txt
@@ -24,6 +26,8 @@ jobs:
     name: Crash case
     steps:
     - uses: actions/checkout@master
+    - name: install crash handler registry
+      run: start-process cmd.exe -Verb runAs -ArgumentList ("/K", "cd", $(Get-Location), "&&", "reg.exe", "IMPORT", "localdumps.reg")
     - name: install ci-runner
       run: |
         pip install -r requirements.txt
@@ -41,6 +45,8 @@ jobs:
     name: Timeout case
     steps:
     - uses: actions/checkout@master
+    - name: install crash handler registry
+      run: start-process cmd.exe -Verb runAs -ArgumentList ("/K", "cd", $(Get-Location), "&&", "reg.exe", "IMPORT", "localdumps.reg")
     - name: install ci-runner
       run: |
         pip install -r requirements.txt

@@ -1,1 +1,0 @@
-winreg; sys_platform == 'win32'
