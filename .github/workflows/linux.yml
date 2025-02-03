@@ -38,14 +38,12 @@ jobs:
       run: |
         # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value and set exit code to 0.
-        ulimit -c unlimited
-        echo "ulimit -c    : `ulimit -c`"
-        echo "core_pattern : `cat /proc/sys/kernel/core_pattern`"
-        python linuxrunner.py -t 60 -- ./testapp -t 5 -c; ret=$?; true
+        python linuxrunner.py -t 60 -- ./testapp -t 5 -c; ret=$?; true; true
         if test $ret -eq 0; then
           echo Error: expecting failure
           exit 777
         fi
+        exit 0
 
   timeout-case:
     runs-on: ubuntu-latest
@@ -66,12 +64,11 @@ jobs:
       run: |
         # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value and set exit code to 0.
-        ulimit -c unlimited
-        echo "ulimit -c    : `ulimit -c`"
-        echo "core_pattern : `cat /proc/sys/kernel/core_pattern`"
-        sudo `which python` linuxrunner.py -t 5 -- ./testapp -t 60; ret=$?; true
+        sudo `which python` linuxrunner.py -t 5 -- ./testapp -t 60; ret=$?; true; true
         if test $ret -eq 0; then
           echo Error: expecting failure
           exit 777
         fi
+        exit 0
+
 
