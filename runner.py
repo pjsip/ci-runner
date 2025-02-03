@@ -60,7 +60,7 @@ class Runner(abc.ABC):
         if box:
             sys.stderr.write('\n' + '#'*60 + '\n')
             sys.stderr.write('##\n')
-        sys.stderr.write(('## ' if box else '') + t.strftime('%H:%M:%S') + 'cirunner: ' + msg + '\n')
+        sys.stderr.write(('## ' if box else '') + t.strftime('%H:%M:%S') + ' cirunner: ' + msg + '\n')
         if box:
             sys.stderr.write('##\n')
             sys.stderr.write('#'*60 + '\n')
@@ -145,7 +145,7 @@ class Runner(abc.ABC):
 
         if self.popen.returncode != 0:
             self.info(f'exit code {self.popen.returncode}, waiting until crash dump is written')
-            for _ in range(60):
+            for _ in range(30):
                 if self.detect_crash():
                     break
                 time.sleep(1)
