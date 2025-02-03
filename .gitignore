@@ -5,3 +5,5 @@
 *.exe
 *.pdb
 procdump.*
+core.*
+testapp

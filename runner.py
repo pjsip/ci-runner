@@ -45,7 +45,7 @@ class Runner(abc.ABC):
         if box:
             print('\n' + '#'*60)
             print('##')
-        print(('## ' if box else '') + 'ci-runner: ' + msg)
+        print(('## ' if box else '') + 'cirunner: ' + msg)
         if box:
             print('##')
             print('#'*60)
@@ -56,7 +56,7 @@ class Runner(abc.ABC):
         if box:
             sys.stderr.write('\n' + '#'*60 + '\n')
             sys.stderr.write('##\n')
-        sys.stderr.write(('## ' if box else '') + 'ci-runner: ' + msg + '\n')
+        sys.stderr.write(('## ' if box else '') + 'cirunner: ' + msg + '\n')
         if box:
             sys.stderr.write('##\n')
             sys.stderr.write('#'*60 + '\n')
@@ -100,13 +100,21 @@ class Runner(abc.ABC):
         """
         pass
 
+    def warmup(self):
+        """
+        This will be called before run()
+        """
+        pass
+
     def run(self):
         """
         Run the program, monitor dump file when crash happens, and terminate
         the program if it runs for longer than permitted.
         """
-
+        self.warmup()
         self.popen = subprocess.Popen([self.path] + self.args, bufsize=0)
+        self.info(f'program launched, pid={self.popen.pid}')
+        
         try:
             self.popen.wait(self.timeout)
         except subprocess.TimeoutExpired as e:
@@ -143,7 +151,7 @@ def main(cls: Runner):
                         help='Max running time in seconds before terminated')
     parser.add_argument('prog', help='Program to run', nargs='?')
     parser.add_argument('args', nargs='*',
-                        help='Arguments for the program (use -- to separate from ci-runner\'s arguments)')
+                        help='Arguments for the program (use -- to separate from cirunner\'s arguments)')
 
     args = parser.parse_args()
 

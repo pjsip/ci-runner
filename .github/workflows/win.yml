@@ -39,7 +39,7 @@ jobs:
       shell: cmd
     - name: run
       run: |
-        # Runner will return non-zero if the test program fails, but this will fail the job.
+        # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
         python winrunner.py -t 60 -- testapp.exe -t 5 -c; $ret=$lastexitcode; cmd /C exit 0
         if ($ret -eq 0) {
@@ -64,7 +64,7 @@ jobs:
       shell: cmd
     - name: run
       run: |
-        # Runner will return non-zero if the test program fails, but this will fail the job.
+        # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
         python winrunner.py -t 5 -- testapp.exe -t 60; $ret=$lastexitcode; cmd /C exit 0
         if ($ret -eq 0) {
