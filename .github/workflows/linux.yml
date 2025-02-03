@@ -10,6 +10,7 @@ jobs:
     - name: install crash handler
       shell: bash
       run: |
+        sudo apt-get install gdb
         pip install -r requirements.txt
         sudo `which python` linuxrunner.py -i
     - name: build testapp
@@ -26,6 +27,7 @@ jobs:
     - name: install crash handler
       shell: bash
       run: |
+        sudo apt-get install gdb
         pip install -r requirements.txt
         sudo `which python` linuxrunner.py -i
     - name: build testapp
