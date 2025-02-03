@@ -38,9 +38,34 @@ jobs:
       run: |
         # Runner will return non-zero if the test program fails, and this will fail the job.
         # So use commands below to save return value and set exit code to 0.
-        python linuxrunner.py -t 60 -- ./testapp -t 5; ret=$?; true
+        python linuxrunner.py -t 60 -- ./testapp -t 5 -c; ret=$?; true
         if test $ret -eq 0; then
           echo Error: expecting failure
-          exit 111
+          exit 777
+        fi
+
+  timeout-case:
+    runs-on: ubuntu-latest
+    name: Timeout case
+    steps:
+    - uses: actions/checkout@master
+    - name: install crash handler
+      shell: bash
+      run: |
+        sudo apt-get -y -q install gdb
+        pip install -r requirements.txt
+        sudo `which python` linuxrunner.py -i
+    - name: build testapp
+      run: |
+        gcc -o testapp -O0 -g testapp.c
+    - name: running test program
+      shell: bash
+      run: |
+        # Runner will return non-zero if the test program fails, and this will fail the job.
+        # So use commands below to save return value and set exit code to 0.
+        python linuxrunner.py -t 5 -- ./testapp -t 60; ret=$?; true
+        if test $ret -eq 0; then
+          echo Error: expecting failure
+          exit 777
         fi
 

@@ -43,7 +43,7 @@ jobs:
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
         python winrunner.py -t 60 -- testapp.exe -t 5 -c; $ret=$lastexitcode; cmd /C exit 0
         if ($ret -eq 0) {
-          cmd /C exit 111
+          cmd /C exit 777
         }
 
   timeout-case:
@@ -68,5 +68,5 @@ jobs:
         # So use commands below to save return value to $ret and set $lastexitcode to 0.
         python winrunner.py -t 5 -- testapp.exe -t 60; $ret=$lastexitcode; cmd /C exit 0
         if ($ret -eq 0) {
-          cmd /C exit 111
+          cmd /C exit 777
         }
