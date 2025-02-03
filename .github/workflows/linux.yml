@@ -1,0 +1,14 @@
+name: Linux Demo
+on:
+  push
+jobs:
+  success-case:
+    runs-on: ubuntu-latest
+    name: Successful case
+    steps:
+    - uses: actions/checkout@v2
+    - name: build testapp
+      run: |
+        gcc -o testapp -O0 -g testapp.c
+    - name: run
+      run: testapp -t 5

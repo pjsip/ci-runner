@@ -1,0 +1,54 @@
+name: Windows Demo
+on:
+  push
+jobs:
+  success-case:
+    runs-on: windows-latest
+    name: Successful case
+    steps:
+    - uses: actions/checkout@master
+    - name: install ci-runner
+      run: |
+        pip install -r requirements.txt
+        python winrunner.py -i
+    - name: build testapp
+      run: |
+        call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+        cl.exe /nologo /Od /Zi testapp.c
+      shell: cmd
+    - name: run
+      run: python winrunner.py -- testapp.exe -t 5
+
+  crash-case:
+    runs-on: windows-latest
+    name: Crash case
+    steps:
+    - uses: actions/checkout@master
+    - name: install ci-runner
+      run: |
+        pip install -r requirements.txt
+        python winrunner.py -i
+    - name: build testapp
+      run: |
+        call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+        cl.exe /nologo /Od /Zi testapp.c
+      shell: cmd
+    - name: run
+      run: python winrunner.py -t 60 -- testapp.exe -t 5 -c
+
+  timeout-case:
+    runs-on: windows-latest
+    name: Timeout case
+    steps:
+    - uses: actions/checkout@master
+    - name: install ci-runner
+      run: |
+        pip install -r requirements.txt
+        python winrunner.py -i
+    - name: build testapp
+      run: |
+        call "%PROGRAMFILES%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+        cl.exe /nologo /Od /Zi testapp.c
+      shell: cmd
+    - name: run
+      run: python winrunner.py -t 5 -- testapp.exe -t 60

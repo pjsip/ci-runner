@@ -1,0 +1,7 @@
+*.o
+*.obj
+*.pyc
+*.ilk
+*.exe
+*.pdb
+procdump.*
