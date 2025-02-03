@@ -64,6 +64,13 @@ class WinRunner(Runner):
         return os.path.abspath( os.path.join(home, 'Dumps') )
 
     @classmethod
+    def get_dump_pattern(cls) -> str:
+        """
+        Get file pattern to find dump files
+        """
+        return "*.dmp"
+
+    @classmethod
     def install(cls):
         """Requires administrator privilege to write to registry"""
         
@@ -141,14 +148,6 @@ class WinRunner(Runner):
         dump_file = f'{basename}.{self.popen.pid}.dmp'
         return os.path.join(dump_dir, dump_file)
         
-    def detect_crash(self) -> bool:
-        """
-        Determine whether process has crashed or just exited normally.
-        Returns True if it had crashed.
-        """
-        dump_path = self.get_dump_path()
-        return os.path.exists(dump_path)
-
     def terminate(self):
         """
         Terminate a process and generate dump file
@@ -188,27 +187,12 @@ class WinRunner(Runner):
         # Don't need the temp dir anymore
         shutil.rmtree(temp_dir)
 
-        # Now it should be detected as crash
-        if not self.detect_crash():
-            dump_dir = self.get_dump_dir()
-            self.err("ERROR: procdump's dump file not detected")
-            self.err(f'Contents of {dump_dir}:')
-            files = os.listdir(dump_dir)
-            self.err('  '.join(files[:20]))
-
 
     def process_crash(self):
         """
         Process dump file.
         """
         dump_path = self.get_dump_path()
-        if not os.path.exists(dump_path):
-            dump_dir = self.get_dump_dir()
-            self.err(f'ERROR: unable to find {dump_path}')
-            self.err(f'Contents of {dump_dir}:')
-            files = os.listdir(dump_dir)
-            self.err('  '.join(files[:20]))
-            raise Exception('Dump file not found')
         
         # Execute cdb to print crash info, but print it to stderr instead
         args = [

@@ -30,6 +30,13 @@ class LinuxRunner(Runner):
         return os.getcwd()
 
     @classmethod
+    def get_dump_pattern(cls) -> str:
+        """
+        Get file pattern to find dump files
+        """
+        return "core.*"
+
+    @classmethod
     def install(cls):
         # This is equal to "ulimit -c unlimited"
         import resource
@@ -70,14 +77,6 @@ class LinuxRunner(Runner):
         dump_file = f'core.{self.popen.pid}'
         return os.path.join(dump_dir, dump_file)
         
-    def detect_crash(self) -> bool:
-        """
-        Determine whether process has crashed or just exited normally.
-        Returns True if it had crashed.
-        """
-        dump_path = self.get_dump_path()
-        return os.path.exists(dump_path)
-
     def terminate(self):
         """
         Terminate a process and generate dump file
@@ -88,16 +87,7 @@ class LinuxRunner(Runner):
         
         # We can now terminate the process
         time.sleep(1)
-        os.kill(self.popen.pid, signal.SIGQUIT)
-        
-        time.sleep(1)
-
-        # Now it should be detected as crash
-        if not self.detect_crash():
-            dump_dir = self.get_dump_dir()
-            self.err("ERROR: core dump file not detected")
-            files = glob.glob(os.path.join(dump_dir, 'core.*'))
-            self.err(f'ls {dump_dir} core.*: ' + '  '.join(files[:20]))
+        os.kill(self.popen.pid, signal.SIGQUIT)            
 
 
     def process_crash(self):

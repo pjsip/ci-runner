@@ -1,5 +1,6 @@
 import abc
 import argparse
+import glob
 import os
 import subprocess
 import sys
@@ -70,6 +71,21 @@ class Runner(abc.ABC):
         """
         pass
 
+    @abc.abstractmethod
+    def get_dump_path(self) -> str:
+        """
+        Get the path of core dump file
+        """
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dump_pattern(cls) -> str:
+        """
+        Get file pattern to find dump files
+        """
+        pass
+
     @classmethod
     @abc.abstractmethod
     def install(cls):
@@ -78,13 +94,13 @@ class Runner(abc.ABC):
         """
         pass
 
-    @abc.abstractmethod
     def detect_crash(self) -> bool:
         """
         Determine whether process has crashed or just exited normally.
         Returns True if it had crashed.
         """
-        pass
+        dump_path = self.get_dump_path()
+        return os.path.exists(dump_path)
 
     @abc.abstractmethod
     def process_crash(self):
@@ -118,22 +134,31 @@ class Runner(abc.ABC):
         try:
             self.popen.wait(self.timeout)
         except subprocess.TimeoutExpired as e:
-            self.err('Execution timeout, terminating process..', box=True)
+            self.info('Execution timeout, terminating process..', box=True)
             self.terminate()
             time.sleep(1)
             if not self.popen.returncode:
                 self.popen.returncode = 1234567
 
         if self.popen.returncode != 0:
-            self.err(f'exit code {self.popen.returncode}, waiting until crash dump is written')
+            self.info(f'exit code {self.popen.returncode}, waiting until crash dump is written')
             for _ in range(60):
                 if self.detect_crash():
                     break
+                time.sleep(1)
+
             if not self.detect_crash():
                 self.err('ERROR: UNABLE TO FIND CRASH DUMP FILE!')
+                dump_dir = self.get_dump_dir()
+                pat = self.get_dump_pattern()
+                files = glob.glob(os.path.join(dump_dir, pat))
+                self.err(f'ls {dump_dir}/{pat}: ' + '  '.join(files[:20]))
+            else:
+                self.info(f'crash dump found: {self.get_dump_path()}')
+                time.sleep(2)
 
         if self.detect_crash():
-            self.err('Processing crash info..', box=True)
+            self.info('Processing crash info..', box=True)
             self.process_crash()
 
         # Propagate program's return code as our return code
