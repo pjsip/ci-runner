@@ -10,8 +10,6 @@ from typing import List
 
 from runner import Runner, main
 
-# gdb -return-child-result -batch -ex "run" -ex "thread apply all bt" -ex "quit" --args ./${file}
-
 class LinuxRunner(Runner):
     """
     Linux runner

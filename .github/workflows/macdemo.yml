@@ -1,0 +1,33 @@
+name: Linux Demo
+on:
+  push
+jobs:
+  success-case:
+    runs-on: macos-latest
+    name: Successful case
+    steps:
+    - uses: actions/checkout@v2
+    - name: build testapp
+      run: |
+        gcc -o testapp -O0 -g testapp.c
+    - name: system info
+      continue-on-error: true
+      run: |
+        echo "which gdb    : `which gdb`"
+        echo "which lldb   : `which lldb`"
+        echo "which gcc    : `which gcc`"
+        echo "ulimit -c    : `ulimit -c`"
+        echo "core pattern : `sysctl kern.corefile`"
+        echo "ls /cores"
+        ls /cores
+        echo testing /cores writable
+        touch /cores/test_writable
+    - name: crash test
+      continue-on-error: true
+      run: |
+        ulimit -c unlimited
+        ./testapp -t 5 -c
+        echo ls
+        ls
+        echo ls /cores
+        ls /cores
