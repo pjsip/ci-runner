@@ -49,6 +49,7 @@ class Runner(abc.ABC):
         if box:
             print('##')
             print('#'*60)
+        sys.stdout.flush()
 
     @classmethod
     def err(cls, msg, box=False):
@@ -59,7 +60,7 @@ class Runner(abc.ABC):
         if box:
             sys.stderr.write('##\n')
             sys.stderr.write('#'*60 + '\n')
-
+        sys.stderr.flush()
         
     @classmethod
     @abc.abstractmethod
@@ -112,6 +113,8 @@ class Runner(abc.ABC):
             self.err('Execution timeout, terminating process..', box=True)
             self.terminate()
             time.sleep(1)
+            if not self.popen.returncode:
+                self.popen.returncode = 1234567
 
         if self.popen.returncode != 0:
             self.err(f'exit code {self.popen.returncode}, waiting until crash dump is written')
@@ -126,6 +129,7 @@ class Runner(abc.ABC):
             self.process_crash()
 
         # Propagate program's return code as our return code
+        self.info(f'Exiting with exit code {self.popen.returncode}')
         sys.exit(self.popen.returncode)
 
 
