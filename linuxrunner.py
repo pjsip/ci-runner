@@ -40,8 +40,11 @@ class LinuxRunner(Runner):
     def install(cls):
         # This is equal to "ulimit -c unlimited"
         import resource
-        resource.setrlimit(resource.RLIMIT_CORE,
-                           (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+        val1, val2 = resource.getrlimit(resource.RLIMIT_CORE)
+        if val1!=resource.RLIM_INFINITY or val2!=resource.RLIM_INFINITY:
+            cls.info('Setting ulimit -c..')
+            resource.setrlimit(resource.RLIMIT_CORE,
+                            (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
         # Set core pattern
         with open('/proc/sys/kernel/core_pattern', 'rt') as f:
@@ -49,6 +52,7 @@ class LinuxRunner(Runner):
             core_pat = core_pat.strip()
 
         if core_pat != 'core':
+            cls.info('Setting core_pattern..')
             with open('/proc/sys/kernel/core_pattern', 'wt') as f:
                 f.write('core')
 

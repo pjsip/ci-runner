@@ -1,5 +1,6 @@
 import abc
 import argparse
+import datetime
 import glob
 import os
 import subprocess
@@ -43,10 +44,11 @@ class Runner(abc.ABC):
 
     @classmethod
     def info(cls, msg, box=False):
+        t = datetime.datetime.now()
         if box:
             print('\n' + '#'*60)
             print('##')
-        print(('## ' if box else '') + 'cirunner: ' + msg)
+        print(('## ' if box else '') + t.strftime('%H:%M:%S') + ' cirunner: ' + msg)
         if box:
             print('##')
             print('#'*60)
@@ -54,10 +56,11 @@ class Runner(abc.ABC):
 
     @classmethod
     def err(cls, msg, box=False):
+        t = datetime.datetime.now()
         if box:
             sys.stderr.write('\n' + '#'*60 + '\n')
             sys.stderr.write('##\n')
-        sys.stderr.write(('## ' if box else '') + 'cirunner: ' + msg + '\n')
+        sys.stderr.write(('## ' if box else '') + t.strftime('%H:%M:%S') + 'cirunner: ' + msg + '\n')
         if box:
             sys.stderr.write('##\n')
             sys.stderr.write('#'*60 + '\n')
@@ -155,7 +158,7 @@ class Runner(abc.ABC):
                 self.err(f'ls {dump_dir}/{pat}: ' + '  '.join(files[:20]))
             else:
                 self.info(f'crash dump found: {self.get_dump_path()}')
-                time.sleep(2)
+                time.sleep(5)
 
         if self.detect_crash():
             self.info('Processing crash info..', box=True)
