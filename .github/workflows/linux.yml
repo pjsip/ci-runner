@@ -40,10 +40,7 @@ jobs:
         # So use commands below to save return value and set exit code to 0.
         ulimit -c unlimited
         echo "ulimit -c    : `ulimit -c`"
-        sudo chmod 777 .
         echo "core_pattern : `cat /proc/sys/kernel/core_pattern`"
-        echo Test writing..
-        touch tmp_test_writing
         python linuxrunner.py -t 60 -- ./testapp -t 5 -c; ret=$?; true
         if test $ret -eq 0; then
           echo Error: expecting failure
@@ -72,7 +69,6 @@ jobs:
         ulimit -c unlimited
         echo "ulimit -c    : `ulimit -c`"
         echo "core_pattern : `cat /proc/sys/kernel/core_pattern`"
-        #sudo echo core > /proc/sys/kernel/core_pattern
         sudo `which python` linuxrunner.py -t 5 -- ./testapp -t 60; ret=$?; true
         if test $ret -eq 0; then
           echo Error: expecting failure

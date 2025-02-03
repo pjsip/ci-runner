@@ -34,8 +34,7 @@ class LinuxRunner(Runner):
         """
         Get file pattern to find dump files
         """
-        #return "core.*"
-        return "*"
+        return "core*"
 
     @classmethod
     def install(cls):
@@ -48,14 +47,17 @@ class LinuxRunner(Runner):
                             (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
         # Set core pattern
+        # Core pattern behaves differently between GH runner's linux and my linux.
+        # In my linux, pattern "core" generates "core.pid" file. While on GH runner,
+        # it generates just "core". So let's explicitly specify "core.%p" here.
         with open('/proc/sys/kernel/core_pattern', 'rt') as f:
             core_pat = f.read()
             core_pat = core_pat.strip()
 
-        if core_pat != 'core':
+        if core_pat != 'core.%p':
             cls.info('Setting core_pattern..')
             with open('/proc/sys/kernel/core_pattern', 'wt') as f:
-                f.write('core')
+                f.write('core.%p')
 
         # Find gdb
         errors = []
