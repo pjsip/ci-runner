@@ -1,0 +1,14 @@
+on:
+  workflow_call
+
+jobs:
+  install-handler:
+    runs-on: ubuntu-latest
+    name: Install crash handler
+    steps:
+    - name: install crash handler
+      shell: bash
+      run: |
+        sudo apt-get -y -q install gdb
+        pip install -r requirements.txt
+        sudo `which python` linuxrunner.py -i

@@ -7,12 +7,7 @@ jobs:
     name: Successful case
     steps:
     - uses: actions/checkout@v2
-    - name: install crash handler
-      shell: bash
-      run: |
-        sudo apt-get -y -q install gdb
-        pip install -r requirements.txt
-        sudo `which python` linuxrunner.py -i
+    - uses: ./cirunner/linux.yml
     - name: build testapp
       run: |
         gcc -o testapp -O0 -g testapp.c
@@ -24,12 +19,7 @@ jobs:
     name: Crash case
     steps:
     - uses: actions/checkout@master
-    - name: install crash handler
-      shell: bash
-      run: |
-        sudo apt-get -y -q install gdb
-        pip install -r requirements.txt
-        sudo `which python` linuxrunner.py -i
+    - uses: ./cirunner/linux.yml
     - name: build testapp
       run: |
         gcc -o testapp -O0 -g testapp.c
@@ -51,12 +41,7 @@ jobs:
     name: Timeout case
     steps:
     - uses: actions/checkout@master
-    - name: install crash handler
-      shell: bash
-      run: |
-        sudo apt-get -y -q install gdb
-        pip install -r requirements.txt
-        sudo `which python` linuxrunner.py -i
+    - uses: ./cirunner/linux.yml
     - name: build testapp
       run: |
         gcc -o testapp -O0 -g testapp.c
