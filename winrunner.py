@@ -55,7 +55,18 @@ class WinRunner(Runner):
         Find procdump.exe.
         See https://learn.microsoft.com/en-us/sysinternals/downloads/procdump
         """
-        return shutil.which('procdump')
+        path = shutil.which('procdump')
+        if path:
+            return path
+
+        # find procdump.exe in same directory as this script
+        dir = os.path.dirname(__file__)
+        path = os.path.join(dir, 'procdump.exe')
+        if os.path.exists(path):
+            return path
+    
+        # giving up
+        return None
 
     @classmethod
     def get_dump_dir(cls) -> str:
