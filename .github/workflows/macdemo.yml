@@ -38,5 +38,5 @@ jobs:
         ls -l /cores
         core=`ls /cores/core.*` | head -1
         echo core file is $core
-        lldb --cores $core -o 'bt all' -o quit ./testapp
+        lldb --core $core -o 'bt all' -o quit ./testapp
 

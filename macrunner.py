@@ -81,7 +81,7 @@ class MacRunner(Runner):
         """
         Process dump file.
         """
-        cmd = f'''{self.lldb_path} --cores {self.get_dump_path()} ''' + \
+        cmd = f'''{self.lldb_path} --core {self.get_dump_path()} ''' + \
               f'''-o 'bt all' -o quit ''' + \
               f'''{self.path}'''
         os.system(cmd)
