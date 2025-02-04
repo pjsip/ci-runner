@@ -405,22 +405,45 @@ core. It then runs **lldb** to analyze the minidump.
 The output of **lldb** is quite extensive, and useful. It shows stack trace
 of all threads along with values of all parameters. 
 
-Below is the output of the `testapp` that ships with **cirunner**. I don't have sample crash output
-of PJSIP yet, let's wait until it crashes. :D
+**lldb** output is okay, it shows crash location, stack trace, and stack trace
+of all threads, **along with values of all parameters**.
+Click **Show output** below for sample output with bug induced `pjlib-test` running with `-w 4`.
 
 <details>
   <summary>Show output</summary>
 
 ```
-(lldb) target create "/Users/runner/work/cirunner/cirunner/testapp" --core "/cores/core.2979"
-Core file '/cores/core.2979' (arm64) was loaded.
+(lldb) target create "/Users/runner/work/pjproject/pjproject/pjlib/bin/pjlib-test-arm-apple-darwin23.6.0" --core "/cores/core.18011"
+Core file '/cores/core.18011' (arm64) was loaded.
 (lldb) bt all
+warning: could not execute support code to read Objective-C class data in the process. This may reduce the quality of type information available.
+
 * thread #1, stop reason = ESR_EC_DABORT_EL0 (fault address: 0x0)
-  * frame #0: 0x00000001026d3c80 testapp`crash_me(invalid_ptr=0x0000000000000000) at testapp.c:19:18
-    frame #1: 0x00000001026d3e50 testapp`main(argc=4, argv=0x000000016d72e570) at testapp.c:55:9
-    frame #2: 0x000000018bf7f154 dyld`start + 2476
+  * frame #0: 0x0000000100e64ef0 pjlib-test-arm-apple-darwin23.6.0`timestamp_test at timestamp.c:139:22
+  thread #2
+    frame #0: 0x00000001932643c8 libsystem_kernel.dylib`__semwait_signal + 8
+    frame #1: 0x0000000193145568 libsystem_c.dylib`nanosleep + 220
+    frame #2: 0x0000000193145480 libsystem_c.dylib`usleep + 68
+    frame #3: 0x0000000100e6eb60 pjlib-test-arm-apple-darwin23.6.0`pj_thread_sleep(msec=100) at os_core_unix.c:948:5
+    frame #4: 0x0000000100e9ef90 pjlib-test-arm-apple-darwin23.6.0`text_runner_thread_proc(arg=0x00000001378134f0) at unittest.c:746:13
+    frame #5: 0x0000000100e6e5dc pjlib-test-arm-apple-darwin23.6.0`thread_main(param=0x0000000137813500) at os_core_unix.c:701:27
+    frame #6: 0x00000001932a1f94 libsystem_pthread.dylib`_pthread_start + 136
+  thread #3
+    frame #0: 0x00000001932643c8 libsystem_kernel.dylib`__semwait_signal + 8
+    frame #1: 0x0000000193145568 libsystem_c.dylib`nanosleep + 220
+    frame #2: 0x0000000193145480 libsystem_c.dylib`usleep + 68
+    frame #3: 0x0000000100e6eb60 pjlib-test-arm-apple-darwin23.6.0`pj_thread_sleep(msec=100) at os_core_unix.c:948:5
+    frame #4: 0x0000000100e9ef90 pjlib-test-arm-apple-darwin23.6.0`text_runner_thread_proc(arg=0x00000001378135d8) at unittest.c:746:13
+    frame #5: 0x0000000100e6e5dc pjlib-test-arm-apple-darwin23.6.0`thread_main(param=0x00000001378135e8) at os_core_unix.c:701:27
+    frame #6: 0x00000001932a1f94 libsystem_pthread.dylib`_pthread_start + 136
 (lldb) quit
-02:13:29 cirunner: Exiting with exit code -11
+08:50:39 cirunner: Exiting with exit code -11
 ```
 
 </details>
+
+
+**TODO**
+
+Maybe someone can improve **lldb** commands to dump more info about the crash (similar to `where`
+command in **gdb**).
