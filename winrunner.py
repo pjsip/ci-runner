@@ -18,9 +18,8 @@ class WinRunner(Runner):
     Windows runner
     """
 
-    def __init__(self, path: str, args: List[str], 
-                 timeout: int = Runner.TIMEOUT):
-        super().__init__(path, args, timeout=timeout)
+    def __init__(self, path: str, args: List[str], **kwargs):
+        super().__init__(path, args, **kwargs)
 
         self.cdb_exe = self.find_cdb()
         if not self.cdb_exe:

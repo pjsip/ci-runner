@@ -16,9 +16,8 @@ class MacRunner(Runner):
     Mac runner
     """
 
-    def __init__(self, path: str, args: List[str], 
-                 timeout: int = Runner.TIMEOUT):
-        super().__init__(path, args, timeout=timeout)
+    def __init__(self, path: str, args: List[str], **kwargs):
+        super().__init__(path, args, **kwargs)
 
         self.lldb_path = shutil.which('lldb')
         if not self.lldb_path:

@@ -15,9 +15,8 @@ class LinuxRunner(Runner):
     Linux runner
     """
 
-    def __init__(self, path: str, args: List[str], 
-                 timeout: int = Runner.TIMEOUT):
-        super().__init__(path, args, timeout=timeout)
+    def __init__(self, path: str, args: List[str], **kwargs):
+        super().__init__(path, args, **kwargs)
 
         self.gdb_path = shutil.which('gdb')
         if not self.gdb_path:

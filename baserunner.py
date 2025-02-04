@@ -42,6 +42,10 @@ class Runner(abc.ABC):
         self.artifact_dir = artifact_dir
         '''Output directory to copy artifacts (program and dump file)'''
 
+        if self.artifact_dir:
+            self.artifact_dir = os.path.abspath(self.artifact_dir)
+            self.info(f'will write artifacts to {self.artifact_dir} on crash')
+
         self.popen : subprocess.Popen = None
         '''Popen object when running the program, will be set later'''
 
@@ -173,12 +177,12 @@ class Runner(abc.ABC):
                     if not os.path.exists(self.artifact_dir):
                         os.makedirs(self.artifact_dir)
                     self.info(f'  Copying {self.path}..',)
-                    shutil.copyfile(self.path, self.artifact_dir)
+                    shutil.copy(self.path, self.artifact_dir)
 
                     self.info(f'  Copying {self.get_dump_path()}..',)
-                    shutil.copyfile(self.get_dump_path(), self.artifact_dir)
+                    shutil.copy(self.get_dump_path(), self.artifact_dir)
                 except Exception as e:
-                    self.err('Caught exception: ' + str(e))
+                    self.err('  Caught exception: ' + str(e))
             self.process_crash()
 
         # Propagate program's return code as our return code
