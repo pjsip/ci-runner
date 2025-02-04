@@ -29,6 +29,7 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
+        ulimit -c unlimited
         ./testapp -t 5 -c
     - name: examine crash
       shell: bash
