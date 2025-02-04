@@ -84,8 +84,8 @@ class MacRunner(Runner):
         cmd = f'''{self.lldb_path} --core {self.get_dump_path()} ''' + \
               f'''-o 'bt all' -o quit ''' + \
               f'''{self.path}'''
+        self.info(cmd)
         os.system(cmd)
-
 
 
 if __name__ == '__main__':
