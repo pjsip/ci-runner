@@ -14,7 +14,7 @@ class Runner(abc.ABC):
     Abstract base class for runner class.
     '''
 
-    TIMEOUT = 3600
+    TIMEOUT = 6*3600
     '''Default timeout'''
 
     def __init__(self, path: str, args: List[str], 

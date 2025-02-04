@@ -8,7 +8,7 @@ import sys
 import time
 from typing import List
 
-from runner import Runner, main
+from baserunner import Runner, main
 
 
 class MacRunner(Runner):

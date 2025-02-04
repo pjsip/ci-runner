@@ -8,7 +8,7 @@ import sys
 import time
 from typing import List
 
-from runner import Runner, main
+from baserunner import Runner, main
 
 class LinuxRunner(Runner):
     """
@@ -92,7 +92,7 @@ class LinuxRunner(Runner):
         
         # We can now terminate the process
         time.sleep(1)
-        os.kill(self.popen.pid, signal.SIGQUIT)            
+        os.kill(self.popen.pid, signal.SIGQUIT)
 
     def process_crash(self):
         """
@@ -101,6 +101,7 @@ class LinuxRunner(Runner):
         cmd = f'''{self.gdb_path} -q {self.path} {self.get_dump_path()} ''' + \
               f'''-ex 'set pagination off' ''' + \
               f'''-ex 'set trace-commands on' -ex where -ex 'thread apply all bt' -ex quit'''
+        self.info(cmd)
         os.system(cmd)
 
 

@@ -10,7 +10,7 @@ import urllib.request
 import winreg
 import zipfile
 
-from runner import Runner, main
+from baserunner import Runner, main
 
 
 class WinRunner(Runner):
@@ -34,7 +34,7 @@ class WinRunner(Runner):
     @classmethod
     def find_cdb(cls) -> str:
         """
-        Find cdb.exe (console debugger?).
+        Find cdb.exe (console debugger).
         It can be installed from Windows SDK installer:
         1a. Run Windows SDK 10 installer if you haven't installed it
          b. If you have installed it, run Windows SDK installer from Add/Remove Program ->
@@ -193,7 +193,7 @@ class WinRunner(Runner):
         """
         dump_path = self.get_dump_path()
         
-        # Execute cdb to print crash info, but print it to stderr instead
+        # Execute cdb to print crash info
         args = [
             self.cdb_exe,
             '-z',
@@ -201,6 +201,7 @@ class WinRunner(Runner):
             '-c',
             '!analyze -v; ~* k; q',
         ]
+        self.info(' '.join(args))
         cdb = subprocess.Popen(args)  # , stdout=sys.stderr
         cdb.wait()
 

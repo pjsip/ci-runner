@@ -13,7 +13,7 @@ jobs:
       run: |
         gcc -o testapp -O0 -g testapp.c
     - name: running test program
-      run: python linuxrunner.py -- ./testapp -t 5
+      run: python cirunner.py -- ./testapp -t 5
 
   crash-case:
     runs-on: ubuntu-latest
@@ -30,14 +30,14 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
-        python linuxrunner.py -t 60 -- ./testapp -t 5 -c
+        python cirunner.py -t 60 -- ./testapp -t 5 -c
     - name: check result
       run: |
         if test "${{ steps.running.outcome }}" != "failure"; then
           echo Expecting failure in the previous step but got "${{ steps.running.outcome }}"
           exit 777
         else
-          echo Previous step fails as expected
+          echo Previous step failed as expected
           exit 0
         fi
 
@@ -56,14 +56,14 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
-        python linuxrunner.py -t 5 -- ./testapp -t 60
+        python cirunner.py -t 5 -- ./testapp -t 60
     - name: check result
       run: |
         if test "${{ steps.running.outcome }}" != "failure"; then
           echo Expecting failure in the previous step but got "${{ steps.running.outcome }}"
           exit 777
         else
-          echo Previous step fails as expected
+          echo Previous step failed as expected
           exit 0
         fi
 
