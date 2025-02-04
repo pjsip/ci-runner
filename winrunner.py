@@ -187,7 +187,6 @@ class WinRunner(Runner):
         # Don't need the temp dir anymore
         shutil.rmtree(temp_dir)
 
-
     def process_crash(self):
         """
         Process dump file.

@@ -10,29 +10,30 @@ from typing import List
 
 from runner import Runner, main
 
-class LinuxRunner(Runner):
+
+class MacRunner(Runner):
     """
-    Linux runner
+    Mac runner
     """
 
     def __init__(self, path: str, args: List[str], 
                  timeout: int = Runner.TIMEOUT):
         super().__init__(path, args, timeout=timeout)
 
-        self.gdb_path = shutil.which('gdb')
-        if not self.gdb_path:
-            raise Exception('Could not find gdb')
+        self.lldb_path = shutil.which('lldb')
+        if not self.lldb_path:
+            raise Exception('Could not find lldb')
 
     @classmethod
     def get_dump_dir(cls) -> str:
-        return os.getcwd()
+        return '/cores'
 
     @classmethod
     def get_dump_pattern(cls) -> str:
         """
         Get file pattern to find dump files
         """
-        return "core*"
+        return "core.*"
 
     @classmethod
     def install(cls):
@@ -44,24 +45,11 @@ class LinuxRunner(Runner):
             resource.setrlimit(resource.RLIMIT_CORE,
                             (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
-        # Set core pattern
-        # Core pattern behaves differently between GH runner's linux and my linux.
-        # In my linux, pattern "core" generates "core.pid" file. While on GH runner,
-        # it generates just "core". So let's explicitly specify "core.%p" here.
-        with open('/proc/sys/kernel/core_pattern', 'rt') as f:
-            core_pat = f.read()
-            core_pat = core_pat.strip()
-
-        if core_pat != 'core.%p':
-            cls.info('Setting core_pattern..')
-            with open('/proc/sys/kernel/core_pattern', 'wt') as f:
-                f.write('core.%p')
-
-        # Find gdb
+        # Find lldb
         errors = []
-        gdb_path = shutil.which('gdb')
-        if not gdb_path:
-            errors.append('Could not find gdb')
+        lldb_path = shutil.which('lldb')
+        if not lldb_path:
+            errors.append('Could not find lldb')
 
         if errors:
             cls.err('ERROR: ' + ' '.join(errors))
@@ -69,7 +57,6 @@ class LinuxRunner(Runner):
         
         cls.info('Running infrastructure is ready')
         #os.system('echo "ulimit -c    : `ulimit -c`"')
-        #os.system('echo "core_pattern : `cat /proc/sys/kernel/core_pattern`"')
 
     def warmup(self):
         """
@@ -87,10 +74,6 @@ class LinuxRunner(Runner):
         Terminate a process and generate dump file
         """
         
-        # Generate core dump for the process
-        #os.system(f'sudo gcore {self.popen.pid}')
-        
-        # We can now terminate the process
         time.sleep(1)
         os.kill(self.popen.pid, signal.SIGQUIT)            
 
@@ -98,12 +81,12 @@ class LinuxRunner(Runner):
         """
         Process dump file.
         """
-        cmd = f'''{self.gdb_path} -q {self.path} {self.get_dump_path()} ''' + \
-              f'''-ex 'set pagination off' ''' + \
-              f'''-ex 'set trace-commands on' -ex where -ex 'thread apply all bt' -ex quit'''
+        cmd = f'''{self.lldb_path} --cores {self.get_dump_path()} ''' + \
+              f'''-o 'bt all' -o quit ''' + \
+              f'''{self.path}'''
         os.system(cmd)
 
 
 
 if __name__ == '__main__':
-    main(LinuxRunner)
+    main(MacRunner)
