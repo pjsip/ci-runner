@@ -3,6 +3,7 @@ import argparse
 import datetime
 import glob
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -18,13 +19,14 @@ class Runner(abc.ABC):
     '''Default timeout'''
 
     def __init__(self, path: str, args: List[str], 
-                 timeout: int):
+                 timeout: int, artifact_dir: str):
         """
         Parameters:
         path        The path of (PJSIP) program to run
         args        Arguments to be given to the (PJSIP) program
         timeout     Maximum run time in seconds after which program will be killed
                     and dump will be generated
+        artifact_dir Output directory to copy artifacts (program and dump file)
         """
         self.path = os.path.abspath(path)
         '''Path to program'''
@@ -36,6 +38,9 @@ class Runner(abc.ABC):
 
         self.timeout = timeout
         '''Maximum running time (secs) before we kill the program'''
+
+        self.artifact_dir = artifact_dir
+        '''Output directory to copy artifacts (program and dump file)'''
 
         self.popen : subprocess.Popen = None
         '''Popen object when running the program, will be set later'''
@@ -162,6 +167,18 @@ class Runner(abc.ABC):
 
         if self.detect_crash():
             self.info('Processing crash info..', box=True)
+            if self.artifact_dir:
+                try:
+                    self.info(f'Copying artifacts to {self.artifact_dir}..',)
+                    if not os.path.exists(self.artifact_dir):
+                        os.makedirs(self.artifact_dir)
+                    self.info(f'  Copying {self.path}..',)
+                    shutil.copyfile(self.path, self.artifact_dir)
+
+                    self.info(f'  Copying {self.get_dump_path()}..',)
+                    shutil.copyfile(self.get_dump_path(), self.artifact_dir)
+                except Exception as e:
+                    self.err('Caught exception: ' + str(e))
             self.process_crash()
 
         # Propagate program's return code as our return code
@@ -177,6 +194,8 @@ def main(cls: Runner):
     parser.add_argument('-t', '--timeout', type=int,
                         default=Runner.TIMEOUT,
                         help='Max running time in seconds before terminated')
+    parser.add_argument('-o', '--output',
+                        help='Output directory to copy artifacts (program and core dump)')
     parser.add_argument('prog', help='Program to run', nargs='?')
     parser.add_argument('args', nargs='*',
                         help='Arguments for the program (use -- to separate from cirunner\'s arguments)')
@@ -184,8 +203,8 @@ def main(cls: Runner):
     args = parser.parse_args()
 
     kwargs = {}
-    if args.timeout is not None:
-        kwargs['timeout'] = args.timeout
+    kwargs['timeout'] = args.timeout
+    kwargs['artifact_dir'] = args.output
 
     if args.install:
         cls.install()

@@ -15,7 +15,7 @@ jobs:
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
     - name: running test program
-      run: python cirunner.py -- testapp.exe -t 5
+      run: python cirunner.py -o win-success -- testapp.exe -t 5
 
   crash-case:
     runs-on: windows-latest
@@ -33,7 +33,12 @@ jobs:
       id: running
       continue-on-error: true
       run: |
-        python cirunner.py -t 60 -- testapp.exe -t 5 -c
+        python cirunner.py -t 60 -o win-crash -- testapp.exe -t 5 -c
+    - name: Upload artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        path: win-crash
     - name: check result
       env:
         RUNNING_OUTCOME: ${{ steps.running.outcome }}
@@ -62,7 +67,12 @@ jobs:
       id: running
       continue-on-error: true
       run: |
-        python cirunner.py -t 5 -- testapp.exe -t 60
+        python cirunner.py -t 5 -o win-timeout -- testapp.exe -t 60
+    - name: Upload artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        path: win-timeout
     - name: check result
       env:
         RUNNING_OUTCOME: ${{ steps.running.outcome }}
