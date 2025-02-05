@@ -1,35 +1,75 @@
 # cirunner
 
-**cirunner** is a Python script to setup, capture and display crash in GitHub action,
-for Linux, Windows, and MacOS.
+**cirunner** is a Python script to setup, capture, display crash in GitHub action, and
+uploads core dump etc as action artifacts, for Linux, Windows, and MacOS.
+
+## Usage
+
+Sample workflow in your repository:
+
+```
+env:
+  CI_RUNNER: python ${{ github.workspace }}/cirunner/cirunner.py -t 3600 -o ${{ github.workspace }}/artifacts --
+jobs:
+  cirunner-demo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: get and install cirunner
+      run: |
+        git clone --depth 1 https://github.com/pjsip/cirunner.git
+        cirunner/installlinux.sh
+    - name: build your app
+      run: |
+        gcc -o testapp -O0 -g testapp.c
+    - name: run your app via cirunner
+      run: $CI_RUNNER ./testapp
+    - name: upload artifacts on failure
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ github.run_id }}
+        path: artifacts
+```
+
+(replace `installlinux.sh` with `installmac.sh` and `installwin.ps1` for Mac and Windows).
 
 
 A program is run via the script as follows (for all platforms):
 
 ```bash
-python cirunner.py -t 3600 -- target_exe arg1 arg2 ..
+python cirunner.py -t 600 -o artifacts -- target_exe arg1 arg2 ..
 ```
 
 The above does the following:
 
 1. it sets up crash handler on the system
-2. it forwards any stdout/stderr output from the program without buffering.
-3. it collects and analyze crash dump and display the analysis using a debugger if the program crashes
-4. it terminates the program and generate crash dump and display the analysis using a debugger
-   if the program runs for more than 3606 seconds (default is six hours if timeout is not specified)
-5. it returns using the return value of the program.
+1. it forwards any stdout/stderr output from the program without buffering.
+1. it terminates the program and generate crash dump if the program runs for more than 600 seconds
+   (default is six hours if timeout is not specified)
+1. on crashes, either because of program crash or terminated due to timeout, it does the following:
+
+   - locate the crash dump file
+   - analyze the crash dump with a debugger to show crash location and backtrace of all threads
+   - copy the program, the crash dump file, and other required files (such as `.pdb` file
+     on Windows) to `artifacts` directory (as specified by `-o` option) and upload them as GitHub
+     action artifact, which can be downloaded for offline analysis.
+
+1. it returns using the return value of the program.
 
 
 ## Samples
 
 For examples, see the GitHub action results and yml workflows for each platform in this repository.
 
+Also see https://github.com/pjsip/pjproject/pull/4288 for the usage on pjproject repository, including
+how to debug the crash dump file locally.
 
 ## Windows Notes
 
 **Installation**
 
-The installation is done by both `installwindows.ps1` and `winrunner.py -i`. They do the following tasks.
+The installation is by calling `installwindows.ps1` which does the following tasks:
 
 1. Installing registry in `localdumps.reg`
 2. Download [procdump](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump)
@@ -258,6 +298,22 @@ NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x6
 
 </details>
 
+**Analyzing crash dump locally with Visual Studio**
+
+Source level crash debugging is available with VS (tested with VS 2015).
+
+Note:
+
+- make sure your source version is the same as the repository.
+- heap memory values are not available because we use minidump
+
+Steps:
+
+- Download and extract the artifact zip file somewhere (download artifact from [this run](https://github.com/pjsip/pjproject/actions/runs/13150538447?pr=4288) for a sample). It should contain three files: `.exe`, `.dmp`, and `.pdb`.
+- Launch Visual Studio. Open the `.dmp` file
+- Click **Debug with Native only**
+- Find the location of the source file when asked
+
 
 **Limitations/TODO**
 
@@ -269,21 +325,20 @@ NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x6
 
 **Installation**
 
-The `installlinux.sh` and `linuxrunner.py -i` need to be called once on the target machine to perform
-the following:
+The `installlinux.sh` needs to be called once on the target machine to perform the following:
 
 1. install **gdb**
 2. sets `/proc/sys/kernel/core_pattern` to `core.%p`
 
 **Handling crashes**
 
-The `linuxrunner.py` will take care of setting `ulimit -c` before running the program.
+**cirunner** will take care of setting `ulimit -c` before running the program.
 Any crashes will generate file `core.PID` in the directory where the program is run. 
 **cirunner** then runs **gdb** to analyze the crash. See sample output below.
 
 **Handling timeout**
 
-The `linuxrunner.py` will take care of setting `ulimit -c` before running the program.
+**cirunner** will take care of setting `ulimit -c` before running the program.
 On timeout, **cirunner** sends `SIGQUIT` which (should) cause the program to crash and generate
 core. It then runs **gdb** to analyze the minidump.
 
@@ -381,29 +436,75 @@ Thread 1 (Thread 0x7d25bc000640 (LWP 959143)):
 </details>
 
 
+**Analyzing crash dump locally with VS Code**
+
+Source level crash debugging is available with VS Code.
+
+Note:
+
+- make sure your source file version is the same as the repository.
+- for Linux, heap memory values are not available
+
+Download the artifact zip to a linux machine, extract somewhere (e.g. download sample artifact from [this Linux run](https://github.com/pjsip/pjproject/actions/runs/13150538445?pr=4288)).
+
+Use the following as template for your `launch.json`. The important keys are:
+
+- `program`
+- `coreDumpPath`
+- `sourceFileMap`
+
+```
+    {
+        "name": "coredump",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/path/to/artifact/pjsip-test-x86_64-unknown-linux-gnu",
+        "coreDumpPath": "/path/to/artifact//core.6469",
+        "cwd": "does not matter?",
+        "sourceFileMap": {
+            "/home/runner/work/pjproject/pjproject": "/your/source/to/project/pjproject"
+        },
+        "environment": [
+            {
+                "name": "LD_LIBRARY_PATH",
+                "value": "/additional/dll/such/as/openh264"
+            }
+        ]
+    },
+```
+
+**Analyzing crash dump locally with gdb**
+
+1. download the artifact zip to a linux machine, extract somewhere (e.g. download sample artifact from [this run](https://github.com/pjsip/pjproject/actions/runs/13150538445?pr=4288))
+2. if the crashed program is **pjlib-test**, change directory to `your/source/pjproject/pjlib/bin`, 
+   if the crashed program is **pjsip-test**, change directory to `your/source/pjproject/pjsip/bin`, 
+   etc.
+3. run **gdb**:
+   ```
+   $ gdb /path/to/pjsip-test /path/to/core.12345
+   ```
+
+
 ## MacOS Notes
 
 **Installation**
 
-The `installmac.sh` and `macrunner.py -i` don't do anything. We use `lldb` which is already installed
+The `installmac.sh` doesn't do anything. We use `lldb` which is already installed
 and existing core pattern `/cores/core.%P`.
 
 **Handling crashes**
 
-The `macrunner.py` will take care of setting `ulimit -c` before running the program.
+**cirunner** will take care of setting `ulimit -c` before running the program.
 Any crashes will generate file `core.PID` in `/cores` directory. 
 **cirunner** then runs **lldb** to analyze the crash. See sample output below.
 
 **Handling timeout**
 
-The `macrunner.py` will take care of setting `ulimit -c` before running the program.
+**cirunner** will take care of setting `ulimit -c` before running the program.
 On timeout, **cirunner** sends `SIGQUIT` which (should) cause the program to crash and generate
 core. It then runs **lldb** to analyze the minidump.
 
 **Sample crash dump output**
-
-The output of **lldb** is quite extensive, and useful. It shows stack trace
-of all threads along with values of all parameters. 
 
 **lldb** output is okay, it shows crash location, stack trace, and stack trace
 of all threads, **along with values of all parameters**.
