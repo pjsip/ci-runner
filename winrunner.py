@@ -215,6 +215,20 @@ class WinRunner(Runner):
         cdb = subprocess.Popen(args)  # , stdout=sys.stderr
         cdb.wait()
 
+    def get_additional_artifacts(self) -> List[str]:
+        """
+        Return list of files to be uploaded as additional artifacts when
+        the program crashed and artifact_dir is set.
+        """
+        exe = os.path.abspath(self.path)
+        pdb = os.path.join(
+            os.path.dirname(exe),
+            os.path.splitext(os.path.basename(exe))[0] + '.pdb'
+        )
+        if os.path.exists(pdb):
+            return [pdb]
+        return []
+
 
 if __name__ == '__main__':
     main(WinRunner)

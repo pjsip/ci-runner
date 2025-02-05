@@ -134,6 +134,13 @@ class Runner(abc.ABC):
         """
         pass
 
+    def get_additional_artifacts(self) -> List[str]:
+        """
+        Return list of files to be uploaded as additional artifacts when
+        the program crashed and artifact_dir is set.
+        """
+        return []
+
     def run(self):
         """
         Run the program, monitor dump file when crash happens, and terminate
@@ -181,6 +188,11 @@ class Runner(abc.ABC):
 
                     self.info(f'  Copying {self.get_dump_path()}..',)
                     shutil.copy(self.get_dump_path(), self.artifact_dir)
+
+                    files = self.get_additional_artifacts()
+                    for file in files:
+                        self.info(f'  Copying {file}..',)
+                        shutil.copy(file, self.artifact_dir)
                 except Exception as e:
                     self.err('  Caught exception: ' + str(e))
             self.process_crash()
