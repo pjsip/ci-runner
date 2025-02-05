@@ -146,8 +146,20 @@ class Runner(abc.ABC):
         Run the program, monitor dump file when crash happens, and terminate
         the program if it runs for longer than permitted.
         """
+
+        # TODO:
+        # 1. It looks like when the program crashes, some of the output may not
+        #    be written to stdout/stderr. This is also reported by:
+        #    https://stackoverflow.com/q/77117927/7975037
+
+        # This may not help, but we shall try everything
+        os.environ["PYTHONUNBUFFERED"] = "1"
+
         self.warmup()
-        self.popen = subprocess.Popen([self.path] + self.args, bufsize=0)
+        self.popen = subprocess.Popen([self.path] + self.args,
+                                      shell=False,
+                                      bufsize=0,
+                                      universal_newlines=True)
         self.info(f'program launched, pid={self.popen.pid}')
         
         try:
