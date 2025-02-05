@@ -43,7 +43,7 @@ jobs:
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ github.run_id }}
         path: artifacts
     - name: check result
       if: ${{ always() }}
@@ -78,7 +78,7 @@ jobs:
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ github.run_id }}
         path: artifacts
     - name: check result
       if: ${{ always() }}
