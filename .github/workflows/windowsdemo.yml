@@ -15,7 +15,13 @@ jobs:
         cl.exe /nologo /Od /Zi testapp.c
       shell: cmd
     - name: running test program
-      run: python cirunner.py -o win-success -- testapp.exe -t 5
+      run: python cirunner.py -o artifacts -- testapp.exe -t 5
+    - name: Upload artifacts on failure
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
 
   crash-case:
     runs-on: windows-latest
@@ -32,13 +38,14 @@ jobs:
     - name: running test program
       id: running
       run: |
-        python cirunner.py -t 60 -o win-crash -- testapp.exe -t 5 -c
-    - name: Upload artifacts
+        python cirunner.py -t 60 -o artifacts -- testapp.exe -t 5 -c
+    - name: Upload artifacts on failure
       if: ${{ failure() }}
+      conclusion: success
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.job }}
-        path: win-crash
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
     - name: check result
       if: ${{ always() }}
       env:
@@ -67,13 +74,14 @@ jobs:
     - name: running test program
       id: running
       run: |
-        python cirunner.py -t 5 -o win-timeout -- testapp.exe -t 60
-    - name: Upload artifacts
+        python cirunner.py -t 5 -o artifacts -- testapp.exe -t 60
+    - name: Upload artifacts on failure
       if: ${{ failure() }}
+      conclusion: success
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.job }}
-        path: win-timeout
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
     - name: check result
       if: ${{ always() }}
       env:

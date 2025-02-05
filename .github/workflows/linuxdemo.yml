@@ -13,13 +13,13 @@ jobs:
       run: |
         gcc -o testapp -O0 -g testapp.c
     - name: running test program
-      run: python cirunner.py -o linux-success -- ./testapp -t 5
-    - name: Upload artifacts
+      run: python cirunner.py -o artifacts -- ./testapp -t 5
+    - name: Upload artifacts on failure
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.job }}
-        path: linux-crash
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
 
   crash-case:
     runs-on: ubuntu-latest
@@ -35,13 +35,14 @@ jobs:
       id: running
       shell: bash
       run: |
-        python cirunner.py -t 60 -o linux-crash -- ./testapp -t 5 -c
-    - name: Upload artifacts
+        python cirunner.py -t 60 -o artifacts -- ./testapp -t 5 -c
+    - name: Upload artifacts on failure
       if: ${{ failure() }}
+      conclusion: success
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.job }}
-        path: linux-crash
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
     - name: check result
       if: ${{ always() }}
       run: |
@@ -67,13 +68,14 @@ jobs:
       id: running
       shell: bash
       run: |
-        python cirunner.py -t 5 -o linux-timeout -- ./testapp -t 60
-    - name: Upload artifacts
+        python cirunner.py -t 5 -o artifacts -- ./testapp -t 60
+    - name: Upload artifacts on failure
       if: ${{ failure() }}
+      conclusion: success
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.job }}
-        path: linux-timeout
+        name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
+        path: artifacts
     - name: check result
       if: ${{ always() }}
       run: |
