@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     int crash = 0;
     int *invalid_ptr = NULL;
 
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+
     if (argc<=1) {
         puts("Usage:");
         puts("  testapp [-c] -t SECS");

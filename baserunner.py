@@ -152,9 +152,6 @@ class Runner(abc.ABC):
         #    be written to stdout/stderr. This is also reported by:
         #    https://stackoverflow.com/q/77117927/7975037
 
-        # This may not help, but we shall try everything
-        os.environ["PYTHONUNBUFFERED"] = "1"
-
         self.warmup()
         self.popen = subprocess.Popen([self.path] + self.args,
                                       shell=False,
