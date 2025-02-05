@@ -13,7 +13,7 @@ jobs:
       run: |
         gcc -o testapp -O0 -g testapp.c
     - name: running test program
-      run: python cirunner.py -- ./testapp -t 5
+      run: python cirunner.py -t 60 -o artifacts -- ./testapp -t 5
 
   crash-case:
     runs-on: macos-latest
@@ -27,9 +27,7 @@ jobs:
         gcc -o testapp -O0 -g testapp.c
     - name: running test program
       id: running
-      shell: bash
-      run: |
-        python cirunner.py -t 60 -o artifacts -- ./testapp -t 5 -c
+      run: python cirunner.py -t 60 -o artifacts -- ./testapp -t 5 -c
     - name: Upload artifacts on failure
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
@@ -48,7 +46,7 @@ jobs:
         fi
 
   timeout-case:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     name: Timeout case
     steps:
     - uses: actions/checkout@master
@@ -59,9 +57,7 @@ jobs:
         gcc -o testapp -O0 -g testapp.c
     - name: running test program
       id: running
-      shell: bash
-      run: |
-        python cirunner.py -t 5 -o artifacts -- ./testapp -t 60
+      run: python cirunner.py -t 5 -o artifacts -- ./testapp -t 60
     - name: Upload artifacts on failure
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
