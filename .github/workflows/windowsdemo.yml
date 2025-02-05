@@ -41,7 +41,6 @@ jobs:
         python cirunner.py -t 60 -o artifacts -- testapp.exe -t 5 -c
     - name: Upload artifacts on failure
       if: ${{ failure() }}
-      conclusion: success
       uses: actions/upload-artifact@v4
       with:
         name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
@@ -77,7 +76,6 @@ jobs:
         python cirunner.py -t 5 -o artifacts -- testapp.exe -t 60
     - name: Upload artifacts on failure
       if: ${{ failure() }}
-      conclusion: success
       uses: actions/upload-artifact@v4
       with:
         name: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}
