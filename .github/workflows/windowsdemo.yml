@@ -31,15 +31,16 @@ jobs:
       shell: cmd
     - name: running test program
       id: running
-      continue-on-error: true
       run: |
         python cirunner.py -t 60 -o win-crash -- testapp.exe -t 5 -c
     - name: Upload artifacts
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
       with:
+        name: ${{ github.job }}
         path: win-crash
     - name: check result
+      if: ${{ always() }}
       env:
         RUNNING_OUTCOME: ${{ steps.running.outcome }}
       run: |
@@ -65,15 +66,16 @@ jobs:
       shell: cmd
     - name: running test program
       id: running
-      continue-on-error: true
       run: |
         python cirunner.py -t 5 -o win-timeout -- testapp.exe -t 60
     - name: Upload artifacts
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
       with:
+        name: ${{ github.job }}
         path: win-timeout
     - name: check result
+      if: ${{ always() }}
       env:
         RUNNING_OUTCOME: ${{ steps.running.outcome }}
       run: |
