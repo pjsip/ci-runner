@@ -73,7 +73,7 @@ jobs:
     - name: running test program
       id: running
       run: |
-        python cirunner.py -t 5 -o artifacts -- testapp.exe -t 60
+        python cirunner.py -t 20 -o artifacts -- testapp.exe -t 60
     - name: Upload artifacts on failure
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4

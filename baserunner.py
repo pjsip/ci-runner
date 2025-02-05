@@ -147,7 +147,7 @@ class Runner(abc.ABC):
         the program if it runs for longer than permitted.
         """
         self.warmup()
-        self.popen = subprocess.Popen([self.path] + self.args)
+        self.popen = subprocess.Popen([self.path] + self.args, bufsize=0)
         self.info(f'program launched, pid={self.popen.pid}')
         
         try:
