@@ -4,6 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 pushd "$SCRIPT_DIR"
 
 echo Installing gdb..
+sudo apt-get update
 sudo apt-get -y -q install gdb
 sudo `which python` linuxrunner.py -i
 
